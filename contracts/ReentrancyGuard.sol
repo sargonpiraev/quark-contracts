@@ -12,7 +12,7 @@ contract ReentrancyGuard {
   /**
    * @dev We use a single lock for the whole contract.
    */
-  bool private reentrancy_lock = false;
+    bool private reentrancyLock = false;
 
   /**
    * @dev Prevents a contract from calling itself, directly or indirectly.
@@ -22,11 +22,11 @@ contract ReentrancyGuard {
    * `private` function doing the actual work, and a `external`
    * wrapper marked as `nonReentrant`.
    */
-  modifier nonReentrant() {
-    require(!reentrancy_lock);
-    reentrancy_lock = true;
-    _;
-    reentrancy_lock = false;
-  }
+    modifier nonReentrant() {
+        require(!reentrancyLock);
+        reentrancyLock = true;
+        _;
+        reentrancyLock = false;
+    }
 
 }
