@@ -1,5 +1,6 @@
-pragma solidity ^0.4.17;
+pragma solidity 0.4.19;
 
+import "./SafeMath.sol"
 
 
 /**
@@ -7,39 +8,36 @@ pragma solidity ^0.4.17;
  * @dev Simpler version of ERC20 interface
  * @dev see https://github.com/ethereum/EIPs/issues/179
  */
-
-
 contract ERC20Basic {
-
-
     uint256 public totalSupply;
-    function balanceOf(address who) constant returns (uint256);
+    function balanceOf(address who) constant  returns (uint256);
     function transfer(address to, uint256 value) returns (bool);
     event Transfer(address indexed from, address indexed to, uint256 value);
 }
+
+
 /**
  * @title ERC20 interface
  * @dev see https://github.com/ethereum/EIPs/issues/20
  */
 contract ERC20 is ERC20Basic {
-  function allowance(address owner, address spender) constant returns (uint256);
-  function transferFrom(address from, address to, uint256 value) returns (bool);
-  function approve(address spender, uint256 value) returns (bool);
-  event Approval(address indexed owner, address indexed spender, uint256 value);
+    function allowance(address owner, address spender) constant returns (uint256);
+    function transferFrom(address from, address to, uint256 value) returns (bool);
+    function approve(address spender, uint256 value) returns (bool);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
 }
+
+
 /**
  * @title SafeMath
  * @dev Math operations with safety checks that throw on error
  */
-
 library SafeMath {
-
-
-  function mul(uint256 a, uint256 b) internal constant returns (uint256) {
-    uint256 c = a * b;
-    assert(a == 0 || c / a == b);
-    return c;
-  }
+    function mul(uint256 a, uint256 b) internal constant returns (uint256) {
+        uint256 c = a * b;
+        assert(a == 0 || c / a == b);
+        return c;
+    }
 
     function div(uint256 a, uint256 b) internal constant returns (uint256) {
     // assert(b > 0); // Solidity automatically throws when dividing by 0
@@ -60,14 +58,14 @@ library SafeMath {
     }
 
 }
+
+
 /**
  * @title Basic token
  * @dev Basic version of StandardToken, with no allowances.
  */
 contract BasicToken is ERC20Basic {
-
     using SafeMath for uint256;
-
     modifier onlyPayloadSize(uint size) {
         assert(msg.data.length == size + 4);
         _;
@@ -85,7 +83,7 @@ contract BasicToken is ERC20Basic {
         balances[_to] = balances[_to].add(_value);
         Transfer(msg.sender, _to, _value);
         return true;
-  }
+    }
 
   /**
   * @dev Gets the balance of the specified address.
@@ -97,6 +95,7 @@ contract BasicToken is ERC20Basic {
     }
 }
 
+
 /**
  * @title Standard ERC20 token
  *
@@ -106,7 +105,6 @@ contract BasicToken is ERC20Basic {
  * https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
  */
 contract StandardToken is ERC20, BasicToken {
-
     mapping (address => mapping (address => uint256)) allowed;
 
   /**
@@ -158,6 +156,7 @@ contract StandardToken is ERC20, BasicToken {
 
 }
 
+
 /**
  * @title Ownable
  * @dev The Ownable contract has an owner address, and provides basic authorization control
@@ -194,15 +193,14 @@ contract Ownable {
 
 }
 
+
 /**
  * @title Mintable token
  * @dev Simple ERC20 Token example, with mintable token creation
  * @dev Issue: * https://github.com/OpenZeppelin/zeppelin-solidity/issues/120
  * Based on code by TokenMarketNet: https://github.com/TokenMarketNet/ico/blob/master/contracts/MintableToken.sol
  */
-
 contract MintableToken is StandardToken, Ownable {
-
     event Mint(address indexed to, uint256 amount);
     event MintFinished();
 
@@ -231,13 +229,13 @@ contract MintableToken is StandardToken, Ownable {
 
 }
 
+
 contract BSEToken is MintableToken {
+    string public constant NAME = " QUARK MARKET ";
 
-    string public constant name = " BLACK SNAIL ENERGY ";
+    string public constant SYMBOL = "BSE";
 
-    string public constant symbol = "BSE";
-
-    uint32 public constant decimals = 18;
+    uint32 public constant DECIMALS = 18;
 
     event Burn(address indexed burner, uint256 value);
 
@@ -259,8 +257,8 @@ contract BSEToken is MintableToken {
 
 }
 
-contract ReentrancyGuard {
 
+contract ReentrancyGuard {
   /**
    * @dev We use a single lock for the whole contract.
    */
@@ -281,6 +279,7 @@ contract ReentrancyGuard {
         rentrancy_lock = false;
     }
 }
+
 
 contract Stateful {
     enum State {
@@ -307,12 +306,13 @@ contract Stateful {
 
 
 contract FiatContract {
-    function ETH(uint _id) constant returns (uint256);
+    function ETH(uint _id) public constant returns (uint256);
     function USD(uint _id) constant returns (uint256);
     function EUR(uint _id) constant returns (uint256);
     function GBP(uint _id) constant returns (uint256);
     function updatedAt(uint _id) constant returns (uint);
 }
+
 
 contract Crowdsale is Ownable, ReentrancyGuard, Stateful {
 
@@ -321,12 +321,11 @@ contract Crowdsale is Ownable, ReentrancyGuard, Stateful {
     mapping (address => uint) preICOinvestors;
     mapping (address => uint) ICOinvestors;
 
-    BSEToken public token ;
+    BSEToken public token;
     uint256 public startICO;
     uint256 public startPreICO;
     uint256 public period;
     uint256 public constant rateCent = 2000000000000000;
-
     uint256 public constant preICOTokenHardCap = 440000 * 1 ether;
     uint256 public constant ICOTokenHardCap = 1540000 * 1 ether;
     uint256 public collectedCent;
@@ -335,10 +334,13 @@ contract Crowdsale is Ownable, ReentrancyGuard, Stateful {
 
     address multisig;
 
-    FiatContract public price = FiatContract(0x2CDe56E5c8235D6360CCbb0c57Ce248Ca9C80909); // mainnet 0x8055d0504666e2B6942BeB8D6014c964658Ca591 testnet 0x2CDe56E5c8235D6360CCbb0c57Ce248Ca9C80909
+    FiatContract public price = FiatContract(0x2CDe56E5c8235D6360CCbb0c57Ce248Ca9C80909);
+    // mainnet 0x8055d0504666e2B6942BeB8D6014c964658Ca591
+    // testnet 0x2CDe56E5c8235D6360CCbb0c57Ce248Ca9C80909
 
     modifier saleIsOn() {
-        require((state == State.PreIco || state == State.ICO) &&(now < startICO + period || now < startPreICO + period));
+        require((state == State.PreIco || state == State.ICO)
+        &&(now < startICO + period || now < startPreICO + period));
         _;
     }
 
@@ -347,23 +349,13 @@ contract Crowdsale is Ownable, ReentrancyGuard, Stateful {
         _;
     }
 
-    function getHardcap() internal returns(uint256) {
-        if (state == State.PreIco) {
-            return preICOTokenHardCap;
-        }
-    else {
-        if (state == State.ICO) {
-            return ICOTokenHardCap;
-        }
-    }
-    }
 
 
     function Crowdsale(address _multisig) {
         multisig = _multisig;
         token = new BSEToken();
-
     }
+
     function startCompanySell() onlyOwner {
         require(state == State.CrowdsaleFinished);
         setState(State.companySold);
@@ -436,8 +428,7 @@ contract Crowdsale is Ownable, ReentrancyGuard, Stateful {
             preICOinvestors[msg.sender] = 0;
             token.mint(msg.sender, extraTokensAmount);
             ICOinvestors[msg.sender] += extraTokensAmount;
-        }
-        else {
+        }else {
             if (state == State.companySold) {
                 extraTokensAmount = preICOinvestors[msg.sender] + ICOinvestors[msg.sender];
                 preICOinvestors[msg.sender] = 0;
@@ -447,6 +438,15 @@ contract Crowdsale is Ownable, ReentrancyGuard, Stateful {
         }
     }
 
+    function getHardcap() internal returns(uint256) {
+        if (state == State.PreIco) {
+            return preICOTokenHardCap;
+        }else {
+            if (state == State.ICO) {
+                return ICOTokenHardCap;
+            }
+        }
+    }
 
     function mintTokens() payable saleIsOn isUnderHardCap nonReentrant {
         uint256 valueWEI = msg.value;
